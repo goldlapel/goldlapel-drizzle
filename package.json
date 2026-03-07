@@ -1,0 +1,33 @@
+{
+  "name": "goldlapel-drizzle",
+  "version": "0.0.0",
+  "description": "Gold Lapel plugin for Drizzle ORM — automatic Postgres query optimization",
+  "type": "module",
+  "main": "index.js",
+  "exports": "./index.js",
+  "files": [
+    "index.js"
+  ],
+  "peerDependencies": {
+    "drizzle-orm": ">=0.31.0",
+    "goldlapel": ">=0.1.0"
+  },
+  "scripts": {
+    "test": "node --test test/test.js"
+  },
+  "keywords": [
+    "postgres",
+    "drizzle",
+    "drizzle-orm",
+    "optimization",
+    "goldlapel"
+  ],
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/goldlapel/goldlapel-drizzle"
+  },
+  "devDependencies": {
+    "goldlapel": "file:../goldlapel-js"
+  }
+}
