@@ -46,7 +46,7 @@ describe('drizzle', () => {
 
         assert.strictEqual(calls.length, 1)
         assert.strictEqual(calls[0].upstream, 'postgresql://user:pass@host:5432/mydb')
-        assert.deepStrictEqual(calls[0].opts, { port: undefined, extraArgs: undefined })
+        assert.deepStrictEqual(calls[0].opts, { config: undefined, port: undefined, extraArgs: undefined })
         assert.strictEqual(drizzleCalls.length, 1)
         assert.strictEqual(drizzleCalls[0].url, 'postgresql://user:pass@localhost:7932/mydb')
         assert.strictEqual(db._mock, true)
@@ -97,6 +97,36 @@ describe('drizzle', () => {
         assert.deepStrictEqual(calls[0].opts.extraArgs, ['--verbose'])
     })
 
+    it('passes config to start', async () => {
+        process.env.DATABASE_URL = 'postgresql://user:pass@host:5432/mydb'
+        const { _start, calls } = mockStart('postgresql://user:pass@localhost:7932/mydb')
+        const { _drizzle } = mockDrizzle()
+
+        await drizzle({
+            config: { mode: 'butler', poolSize: 30, disableN1: true },
+            _start,
+            _drizzle,
+        })
+
+        assert.deepStrictEqual(calls[0].opts.config, { mode: 'butler', poolSize: 30, disableN1: true })
+    })
+
+    it('strips config from drizzle options', async () => {
+        process.env.DATABASE_URL = 'postgresql://user:pass@host:5432/mydb'
+        const { _start } = mockStart('postgresql://user:pass@localhost:7932/mydb')
+        const { _drizzle, calls: drizzleCalls } = mockDrizzle()
+
+        await drizzle({
+            config: { mode: 'butler' },
+            schema: { users: 'mock' },
+            _start,
+            _drizzle,
+        })
+
+        assert.strictEqual(drizzleCalls[0].options.config, undefined)
+        assert.deepStrictEqual(drizzleCalls[0].options, { schema: { users: 'mock' } })
+    })
+
     it('forwards drizzle options and strips GL options', async () => {
         process.env.DATABASE_URL = 'postgresql://user:pass@host:5432/mydb'
         const { _start } = mockStart('postgresql://user:pass@localhost:7932/mydb')
@@ -107,6 +137,7 @@ describe('drizzle', () => {
             logger: true,
             url: 'postgresql://user:pass@host:5432/mydb',
             port: 9000,
+            config: { mode: 'butler' },
             extraArgs: ['--verbose'],
             _start,
             _drizzle,
@@ -193,6 +224,15 @@ describe('init', () => {
         await init({ extraArgs: ['--verbose'], _start })
 
         assert.deepStrictEqual(calls[0].opts.extraArgs, ['--verbose'])
+    })
+
+    it('passes config to start', async () => {
+        process.env.DATABASE_URL = 'postgresql://user:pass@host:5432/mydb'
+        const { _start, calls } = mockStart('postgresql://user:pass@localhost:7932/mydb')
+
+        await init({ config: { mode: 'butler', poolSize: 30, disableN1: true }, _start })
+
+        assert.deepStrictEqual(calls[0].opts.config, { mode: 'butler', poolSize: 30, disableN1: true })
     })
 
     it('sets DATABASE_URL even when using explicit url', async () => {

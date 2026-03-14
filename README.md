@@ -57,6 +57,7 @@ Both `drizzle()` and `init()` accept an options object:
 |--------|-------------|
 | `url` | Upstream Postgres URL. Defaults to `process.env.DATABASE_URL`. |
 | `port` | Port for the Gold Lapel proxy. Defaults to `7932`. |
+| `config` | Config object passed to Gold Lapel (see below). |
 | `extraArgs` | Array of extra CLI args passed to the Gold Lapel binary. |
 
 `drizzle()` forwards all other options to `drizzle-orm/node-postgres`:
@@ -65,11 +66,29 @@ Both `drizzle()` and `init()` accept an options object:
 const db = await drizzle({
   url: 'postgresql://user:pass@host:5432/mydb',
   port: 9000,
-  extraArgs: ['--verbose'],
+  config: { mode: 'butler', poolSize: 30 },
   schema,
   logger: true,
 })
 ```
+
+## Config
+
+The `config` object lets you tune Gold Lapel without CLI flags. Keys use camelCase:
+
+```javascript
+const db = await drizzle({
+  config: {
+    mode: 'butler',
+    poolSize: 30,
+    disableN1: true,
+    refreshIntervalSecs: 120,
+  },
+  schema,
+})
+```
+
+Any key accepted by the Gold Lapel CLI works here — see the [Gold Lapel docs](https://goldlapel.com/docs) for the full list. Boolean flags like `disableN1` take `true`/`false`; everything else takes a string or number.
 
 ## Re-exports
 
