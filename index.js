@@ -3,6 +3,7 @@ import { start, stop, proxyUrl, GoldLapel } from 'goldlapel'
 export async function drizzle(options = {}) {
     const url = options.url || process.env.DATABASE_URL
     if (!url) throw new Error('Gold Lapel: DATABASE_URL not set. Pass { url } or set DATABASE_URL.')
+    process.env.GOLDLAPEL_CLIENT = 'drizzle'
     const { url: _, port, config, extraArgs, _start, _drizzle, ...drizzleOptions } = options
     const startFn = _start || start
     const proxy = await startFn(url, { config, port, extraArgs })
@@ -13,6 +14,7 @@ export async function drizzle(options = {}) {
 export async function init(options = {}) {
     const url = options.url || process.env.DATABASE_URL
     if (!url) throw new Error('Gold Lapel: DATABASE_URL not set. Pass { url } or set DATABASE_URL.')
+    process.env.GOLDLAPEL_CLIENT = 'drizzle'
     const startFn = options._start || start
     const proxy = await startFn(url, { config: options.config, port: options.port, extraArgs: options.extraArgs })
     process.env.DATABASE_URL = proxy
