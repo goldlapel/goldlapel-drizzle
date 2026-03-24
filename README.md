@@ -47,7 +47,7 @@ const db = drizzle(process.env.DATABASE_URL)
 
 ## Driver note
 
-`drizzle()` uses `drizzle-orm/node-postgres` under the hood. If you use a different driver (postgres.js, Neon serverless, etc.), use `init()` instead — it rewrites `DATABASE_URL` and works with any driver.
+`drizzle()` uses `drizzle-orm/node-postgres` under the hood and includes L1 native cache automatically. If you use a different driver (postgres.js, Neon serverless, etc.), use `init()` instead — it rewrites `DATABASE_URL` and works with any driver, but does not include L1 cache (the proxy still handles all server-side optimizations).
 
 ## Options
 
@@ -60,6 +60,13 @@ Both `drizzle()` and `init()` accept an options object:
 | `config` | Config object passed to Gold Lapel (see below). |
 | `extraArgs` | Array of extra CLI args passed to the Gold Lapel binary. |
 
+`drizzle()` also accepts L1 cache options:
+
+| Option | Description |
+|--------|-------------|
+| `invalidationPort` | Port for cache invalidation. Defaults to proxy port + 2 (`7934`). |
+| `nativeCache` | Set to `false` to disable L1 native cache. Enabled by default. |
+
 `drizzle()` forwards all other options to `drizzle-orm/node-postgres`:
 
 ```javascript
@@ -67,9 +74,16 @@ const db = await drizzle({
   url: 'postgresql://user:pass@host:5432/mydb',
   port: 9000,
   config: { mode: 'butler', poolSize: 30 },
+  invalidationPort: 9002,
   schema,
   logger: true,
 })
+```
+
+To disable L1 cache (proxy-only mode):
+
+```javascript
+const db = await drizzle({ nativeCache: false, schema })
 ```
 
 ## Config
@@ -92,8 +106,8 @@ Any key accepted by the Gold Lapel CLI works here — see the [Gold Lapel docs](
 
 ## Re-exports
 
-For convenience, `goldlapel-drizzle` re-exports everything from `goldlapel`:
+For convenience, `goldlapel-drizzle` re-exports from `goldlapel`:
 
 ```javascript
-import { start, stop, proxyUrl, GoldLapel } from 'goldlapel-drizzle'
+import { start, stop, proxyUrl, GoldLapel, wrap, NativeCache } from 'goldlapel-drizzle'
 ```
