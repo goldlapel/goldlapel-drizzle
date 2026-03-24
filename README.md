@@ -1,6 +1,6 @@
 # goldlapel-drizzle
 
-Gold Lapel plugin for [Drizzle ORM](https://orm.drizzle.team/) — automatic Postgres query optimization with one line of code.
+Gold Lapel plugin for [Drizzle ORM](https://orm.drizzle.team/) — automatic Postgres query optimization with one line of code. Includes L1 native cache — an in-process cache that serves repeated reads in microseconds with no TCP round-trip.
 
 ## Install
 
@@ -12,7 +12,7 @@ npm install goldlapel goldlapel-drizzle
 
 ### Option A: `drizzle()` (node-postgres driver)
 
-Returns a wired Drizzle DB instance with the connection routed through Gold Lapel:
+Returns a wired Drizzle DB instance with the connection routed through Gold Lapel and L1 native cache active:
 
 ```javascript
 import { drizzle } from 'goldlapel-drizzle'
