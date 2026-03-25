@@ -22,7 +22,7 @@
     "optimization",
     "goldlapel"
   ],
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "MIT",
   "author": "Stephen Gibson",
   "homepage": "https://goldlapel.com",
   "repository": {
@@ -34,5 +34,8 @@
   },
   "devDependencies": {
     "goldlapel": "file:../goldlapel-js"
+  },
+  "dependencies": {
+    "pg": "^8.20.0"
   }
 }
