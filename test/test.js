@@ -45,9 +45,11 @@ function mockPg() {
 
 describe('drizzle', () => {
     const origUrl = process.env.DATABASE_URL
+    const origClient = process.env.GOLDLAPEL_CLIENT
 
     beforeEach(() => {
         delete process.env.DATABASE_URL
+        delete process.env.GOLDLAPEL_CLIENT
     })
 
     afterEach(() => {
@@ -55,6 +57,11 @@ describe('drizzle', () => {
             process.env.DATABASE_URL = origUrl
         } else {
             delete process.env.DATABASE_URL
+        }
+        if (origClient !== undefined) {
+            process.env.GOLDLAPEL_CLIENT = origClient
+        } else {
+            delete process.env.GOLDLAPEL_CLIENT
         }
     })
 
@@ -214,6 +221,23 @@ describe('drizzle', () => {
 
         assert.strictEqual(db._mock, true)
     })
+
+    it('sets GOLDLAPEL_CLIENT only if not already set', async () => {
+        process.env.DATABASE_URL = 'postgresql://user:pass@host:5432/mydb'
+        const { _start } = mockStart('postgresql://user:pass@localhost:7932/mydb')
+        const { _drizzle } = mockDrizzle()
+        const { _wrap } = mockWrap()
+        const { _pg } = mockPg()
+
+        // When no GOLDLAPEL_CLIENT is set, drizzle sets it
+        await drizzle({ _start, _drizzle, _wrap, _pg })
+        assert.strictEqual(process.env.GOLDLAPEL_CLIENT, 'drizzle')
+
+        // When GOLDLAPEL_CLIENT is already set, it should not be overwritten
+        process.env.GOLDLAPEL_CLIENT = 'prisma'
+        await drizzle({ _start, _drizzle, _wrap, _pg })
+        assert.strictEqual(process.env.GOLDLAPEL_CLIENT, 'prisma')
+    })
 })
 
 
@@ -363,9 +387,11 @@ describe('drizzle L1 cache', () => {
 
 describe('init', () => {
     const origUrl = process.env.DATABASE_URL
+    const origClient = process.env.GOLDLAPEL_CLIENT
 
     beforeEach(() => {
         delete process.env.DATABASE_URL
+        delete process.env.GOLDLAPEL_CLIENT
     })
 
     afterEach(() => {
@@ -373,6 +399,11 @@ describe('init', () => {
             process.env.DATABASE_URL = origUrl
         } else {
             delete process.env.DATABASE_URL
+        }
+        if (origClient !== undefined) {
+            process.env.GOLDLAPEL_CLIENT = origClient
+        } else {
+            delete process.env.GOLDLAPEL_CLIENT
         }
     })
 
@@ -457,6 +488,16 @@ describe('init', () => {
         // in test context (no real proxy running). process.env coerces null to "null".
         assert.strictEqual(result, null)
         assert.strictEqual(process.env.DATABASE_URL, 'null')
+    })
+
+    it('does not overwrite existing GOLDLAPEL_CLIENT', async () => {
+        process.env.DATABASE_URL = 'postgresql://user:pass@host:5432/mydb'
+        process.env.GOLDLAPEL_CLIENT = 'prisma'
+        const { _start } = mockStart('postgresql://user:pass@localhost:7932/mydb')
+
+        await init({ _start })
+
+        assert.strictEqual(process.env.GOLDLAPEL_CLIENT, 'prisma')
     })
 })
 

@@ -1,3 +1,10 @@
+// Gold Lapel plugin for Drizzle ORM.
+//
+// Driver requirement: This plugin uses the `pg` npm package (node-postgres)
+// and `drizzle-orm/node-postgres`. It does NOT support `postgres` (postgres.js)
+// or `drizzle-orm/postgres-js`. If you need postgres.js support, use the
+// goldlapel `init()` function to rewrite DATABASE_URL and create your own
+// drizzle instance with the proxy URL.
 import { start, stop, proxyUrl, GoldLapel, wrap, NativeCache } from 'goldlapel'
 
 const DEFAULT_PORT = 7932
@@ -5,7 +12,7 @@ const DEFAULT_PORT = 7932
 export async function drizzle(options = {}) {
     const url = options.url || process.env.DATABASE_URL
     if (!url) throw new Error('Gold Lapel: DATABASE_URL not set. Pass { url } or set DATABASE_URL.')
-    process.env.GOLDLAPEL_CLIENT = 'drizzle'
+    if (!process.env.GOLDLAPEL_CLIENT) process.env.GOLDLAPEL_CLIENT = 'drizzle'
     const {
         url: _, port, config, extraArgs, invalidationPort, nativeCache,
         _start, _drizzle, _wrap, _pg,
@@ -37,7 +44,7 @@ export async function drizzle(options = {}) {
 export async function init(options = {}) {
     const url = options.url || process.env.DATABASE_URL
     if (!url) throw new Error('Gold Lapel: DATABASE_URL not set. Pass { url } or set DATABASE_URL.')
-    process.env.GOLDLAPEL_CLIENT = 'drizzle'
+    if (!process.env.GOLDLAPEL_CLIENT) process.env.GOLDLAPEL_CLIENT = 'drizzle'
     const startFn = options._start || start
     const result = await startFn(url, { config: options.config, port: options.port, extraArgs: options.extraArgs })
     const proxyUrlStr = typeof result === 'string' ? result : proxyUrl()
